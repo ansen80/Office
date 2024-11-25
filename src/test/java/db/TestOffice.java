@@ -1,5 +1,6 @@
 package db;
 
+import office.Department;
 import office.Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,23 @@ public class TestOffice {
             if (itResult.next()) {
                 int count = itResult.getInt("count");
                 assertEquals(2, count, "Должно быть 2 сотрудника в IT");
+            }
+
+
+        }
+    }
+
+    @Test
+    void testDeletionEmployees() throws SQLException {
+        Service.removeDepartment(new Department(2, "IT")); // Удаляем отдел it
+
+        try (Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")) {  // Cотрудников больше нет
+            PreparedStatement checkEmployees = con.prepareStatement("SELECT COUNT(*) AS count FROM Employee WHERE DepartmentID = ?");
+            checkEmployees.setInt(1, 2);
+            ResultSet resultSet = checkEmployees.executeQuery();
+            if (resultSet.next()) {
+                int count = resultSet.getInt("count");
+                assertEquals(0, count, "Все сотрудники из удалённого отдела должны быть удалены.");
             }
         }
     }
